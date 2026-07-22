@@ -48,16 +48,16 @@ export default async function LandingPage() {
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
             <ShieldCheck className="h-5 w-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="font-heading text-base font-semibold leading-tight">
               Guardião Cultural
             </p>
-            <p className="text-xs text-white/80 leading-tight">
+            <p className="hidden text-xs text-white/80 leading-tight sm:block">
               Sistema de Proteção Preventiva ao Patrimônio
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Button
             nativeButton={false}
             variant="ghost"
@@ -71,7 +71,8 @@ export default async function LandingPage() {
             className="bg-white text-[#6b2410] hover:bg-white/90"
             render={<Link href="/cadastro" />}
           >
-            Criar conta
+            <span className="hidden sm:inline">Criar conta</span>
+            <span className="sm:hidden">Criar</span>
           </Button>
         </div>
       </header>

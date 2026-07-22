@@ -40,7 +40,7 @@ export function TopHeader({
         >
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Novo Bem Cultural</span>
-          <span className="sm:hidden">Novo</span>
+          <span className="sm:hidden">Novo Bem</span>
         </Button>
         <UserMenu
           fullName={fullName}

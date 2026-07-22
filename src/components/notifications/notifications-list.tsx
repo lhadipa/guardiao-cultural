@@ -80,37 +80,42 @@ export function NotificationsList() {
             <li
               key={notification.id}
               className={cn(
-                "flex items-start gap-3 p-4",
+                "flex flex-col gap-3 p-4 sm:flex-row sm:items-start",
                 !notification.isRead && "bg-muted/40"
               )}
             >
-              <span
-                className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
-                  config.className
-                )}
-              >
-                <Icon className="h-4 w-4" />
-              </span>
-              <div className="flex-1 space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium">{notification.title}</p>
-                  {!notification.isRead && (
-                    <span className="h-2 w-2 rounded-full bg-primary" />
+              <div className="flex flex-1 items-start gap-3">
+                <span
+                  className={cn(
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                    config.className
                   )}
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
+                <div className="flex-1 space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium">
+                      {notification.title}
+                    </p>
+                    {!notification.isRead && (
+                      <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {notification.message}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {notification.assetName} ·{" "}
+                    <RelativeTime date={notification.createdAt} />
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {notification.message}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {notification.assetName} ·{" "}
-                  <RelativeTime date={notification.createdAt} />
-                </p>
               </div>
               {!notification.isRead && (
                 <Button
                   size="sm"
                   variant="ghost"
+                  className="self-start"
                   onClick={() => markAsRead(notification.id)}
                 >
                   Marcar como lida
