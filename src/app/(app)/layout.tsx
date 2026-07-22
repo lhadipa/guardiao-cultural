@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/layout/sidebar";
-import { UserMenu } from "@/components/layout/user-menu";
+import { TopHeader } from "@/components/layout/top-header";
 import { Toaster } from "@/components/ui/sonner";
 
 export default async function AppLayout({
@@ -25,17 +25,15 @@ export default async function AppLayout({
     .single();
 
   return (
-    <div className="flex min-h-screen bg-muted/40">
-      <Sidebar />
-      <div className="flex flex-1 flex-col">
-        <header className="flex h-16 items-center justify-end border-b bg-background px-6">
-          <UserMenu
-            fullName={profile?.full_name ?? null}
-            email={user.email ?? null}
-            role={profile?.role ?? "tecnico"}
-          />
-        </header>
-        <main className="flex-1 p-6">{children}</main>
+    <div className="flex min-h-screen flex-col bg-muted/40">
+      <TopHeader
+        fullName={profile?.full_name ?? null}
+        email={user.email ?? null}
+        role={profile?.role ?? "tecnico"}
+      />
+      <div className="flex flex-1">
+        <Sidebar />
+        <main className="flex-1 p-4 sm:p-6">{children}</main>
       </div>
       <Toaster />
     </div>

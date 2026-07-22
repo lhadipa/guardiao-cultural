@@ -33,6 +33,7 @@ export function CategoryPieChart({
           innerRadius={55}
           outerRadius={85}
           paddingAngle={2}
+          isAnimationActive={false}
         >
           {data.map((entry, index) => (
             <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />

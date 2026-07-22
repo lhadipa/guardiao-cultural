@@ -15,7 +15,7 @@ export default async function RelatoriosPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Relatórios</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight text-primary">Relatórios</h1>
         <p className="text-sm text-muted-foreground">
           Resumo do acervo e exportação de relatórios
         </p>

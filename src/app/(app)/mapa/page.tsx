@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { MapView } from "@/components/map/map-view";
+import { GeofenceMap } from "@/components/map/geofence-map";
 
 export default async function MapaPage() {
   const supabase = await createClient();
@@ -9,28 +9,25 @@ export default async function MapaPage() {
     .select("id, name, rgc_code, status, latitude, longitude");
 
   return (
-    <div className="flex h-full flex-col gap-4">
+    <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-heading text-2xl font-semibold tracking-tight text-primary">
           Mapa & Geofencing
         </h1>
         <p className="text-sm text-muted-foreground">
-          Monitoramento geográfico dos bens cadastrados. O círculo ao redor de
-          cada bem representa a zona de segurança (ilustrativa).
+          Monitoramento geográfico em tempo real dos bens culturais
         </p>
       </div>
-      <div className="h-[560px] overflow-hidden rounded-lg border">
-        <MapView
-          assets={(assets ?? []).map((a) => ({
-            id: a.id,
-            name: a.name,
-            rgcCode: a.rgc_code,
-            status: a.status,
-            latitude: a.latitude,
-            longitude: a.longitude,
-          }))}
-        />
-      </div>
+      <GeofenceMap
+        assets={(assets ?? []).map((a) => ({
+          id: a.id,
+          name: a.name,
+          rgcCode: a.rgc_code,
+          status: a.status,
+          latitude: a.latitude,
+          longitude: a.longitude,
+        }))}
+      />
     </div>
   );
 }

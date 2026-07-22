@@ -1,6 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { RelativeTime } from "@/components/relative-time";
 
 export interface RecentAlert {
   id: string;
@@ -30,10 +29,7 @@ export function RecentAlerts({ alerts }: { alerts: RecentAlert[] }) {
               <p className="text-xs text-muted-foreground">{alert.message}</p>
             )}
             <p className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(alert.createdAt), {
-                addSuffix: true,
-                locale: ptBR,
-              })}
+              <RelativeTime date={alert.createdAt} />
             </p>
           </div>
         </li>

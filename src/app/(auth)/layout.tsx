@@ -12,7 +12,7 @@ export default function AuthLayout({
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <ShieldCheck className="h-6 w-6" />
           </div>
-          <h1 className="text-xl font-semibold tracking-tight">
+          <h1 className="font-heading text-2xl font-semibold tracking-tight text-primary">
             Guardião Cultural
           </h1>
           <p className="text-sm text-muted-foreground">

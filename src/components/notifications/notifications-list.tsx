@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { AlertTriangle, Info, AlertCircle } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { RelativeTime } from "@/components/relative-time";
 import { Button } from "@/components/ui/button";
 import {
   MOCK_NOTIFICATIONS,
@@ -105,10 +104,7 @@ export function NotificationsList() {
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {notification.assetName} ·{" "}
-                  {formatDistanceToNow(new Date(notification.createdAt), {
-                    addSuffix: true,
-                    locale: ptBR,
-                  })}
+                  <RelativeTime date={notification.createdAt} />
                 </p>
               </div>
               {!notification.isRead && (

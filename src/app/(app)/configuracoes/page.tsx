@@ -31,7 +31,7 @@ export default async function ConfiguracoesPage() {
   return (
     <div className="max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-heading text-2xl font-semibold tracking-tight text-primary">
           Configurações
         </h1>
         <p className="text-sm text-muted-foreground">

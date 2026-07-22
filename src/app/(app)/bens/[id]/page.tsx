@@ -39,7 +39,7 @@ export default async function BemDetalhePage({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="font-heading text-2xl font-semibold tracking-tight text-primary">
               {asset.name}
             </h1>
             <AssetStatusBadge status={asset.status} />
@@ -64,6 +64,7 @@ export default async function BemDetalhePage({
                 src={getAssetPhotoUrl(photo.storage_path)}
                 alt={asset.name}
                 fill
+                sizes="(min-width: 640px) 33vw, 50vw"
                 className="object-cover"
               />
             </div>

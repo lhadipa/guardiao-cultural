@@ -28,14 +28,19 @@ export default async function BensPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="font-heading text-2xl font-semibold tracking-tight text-primary">
             Bens Culturais
           </h1>
           <p className="text-sm text-muted-foreground">
             Acervo cadastrado no sistema
           </p>
         </div>
-        <Button render={<Link href="/bens/novo" />}>
+        <Button
+          variant="outline"
+          nativeButton={false}
+          className="border-primary text-primary hover:bg-primary/10"
+          render={<Link href="/bens/novo" />}
+        >
           <Plus className="h-4 w-4" /> Novo Bem
         </Button>
       </div>
