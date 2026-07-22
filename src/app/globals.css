@@ -117,6 +117,12 @@
   --sidebar-ring: #f59e0b;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-in {
+    animation: none !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
