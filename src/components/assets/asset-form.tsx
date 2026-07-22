@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PhotoUploader } from "./photo-uploader";
+import { CepFields } from "./cep-fields";
 
 const initialState: AssetActionState = {};
 
@@ -85,10 +86,7 @@ export function AssetForm() {
         <PhotoUploader />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="address">Endereço completo</Label>
-        <Input id="address" name="address" placeholder="Endereço completo" />
-      </div>
+      <CepFields />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
