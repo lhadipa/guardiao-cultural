@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
-import { Pencil, KeyRound } from "lucide-react";
-import { resetUserPassword, toggleUserStatus } from "@/actions/admin";
+import { useState } from "react";
+import { Pencil } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -19,53 +17,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { MuseumForm, type MuseumFormValues } from "./museum-form";
 
-export interface MuseumUser {
-  id: string;
-  fullName: string | null;
-  email: string;
-  status: "ativo" | "inativo";
-}
-
-export interface MuseumRow extends MuseumFormValues {
-  users: MuseumUser[];
-}
-
-export function MuseumList({ museums }: { museums: MuseumRow[] }) {
+export function MuseumList({ museums }: { museums: MuseumFormValues[] }) {
   const [editing, setEditing] = useState<MuseumFormValues | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const [revealedPassword, setRevealedPassword] = useState<string | null>(null);
-
-  function handleReset(userId: string) {
-    startTransition(async () => {
-      const result = await resetUserPassword(userId);
-      if (result.error) {
-        toast.error(result.error);
-        return;
-      }
-      toast.success(result.success ?? "Senha redefinida");
-      if (result.temporaryPassword) {
-        setRevealedPassword(result.temporaryPassword);
-      }
-    });
-  }
-
-  function handleToggleStatus(userId: string, status: "ativo" | "inativo") {
-    startTransition(async () => {
-      const result = await toggleUserStatus(
-        userId,
-        status === "ativo" ? "inativo" : "ativo"
-      );
-      if (result.error) {
-        toast.error(result.error);
-        return;
-      }
-      toast.success(result.success ?? "Status atualizado");
-    });
-  }
 
   return (
     <>
@@ -73,20 +29,18 @@ export function MuseumList({ museums }: { museums: MuseumRow[] }) {
         <TableHeader>
           <TableRow>
             <TableHead>Museu</TableHead>
+            <TableHead>Endereço</TableHead>
             <TableHead>Cor</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Usuário responsável</TableHead>
             <TableHead className="w-10" />
           </TableRow>
         </TableHeader>
         <TableBody>
           {museums.map((museum) => (
             <TableRow key={museum.id}>
-              <TableCell>
-                <p className="font-medium">{museum.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {museum.address || "Sem endereço"}
-                </p>
+              <TableCell className="font-medium">{museum.name}</TableCell>
+              <TableCell className="text-muted-foreground">
+                {museum.address || "—"}
               </TableCell>
               <TableCell>
                 <span className="inline-flex items-center gap-2">
@@ -101,51 +55,6 @@ export function MuseumList({ museums }: { museums: MuseumRow[] }) {
                 <Badge variant={museum.status === "ativo" ? "default" : "secondary"}>
                   {museum.status === "ativo" ? "Ativo" : "Inativo"}
                 </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="space-y-2">
-                  {museum.users.length === 0 && (
-                    <span className="text-xs text-muted-foreground">
-                      Nenhum usuário
-                    </span>
-                  )}
-                  {museum.users.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex flex-wrap items-center gap-2"
-                    >
-                      <div>
-                        <p className="text-sm font-medium leading-tight">
-                          {user.fullName ?? "Sem nome"}
-                        </p>
-                        <p className="text-xs leading-tight text-muted-foreground">
-                          {user.email}
-                        </p>
-                      </div>
-                      <Badge
-                        variant={user.status === "ativo" ? "default" : "secondary"}
-                      >
-                        {user.status === "ativo" ? "Ativo" : "Inativo"}
-                      </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={isPending}
-                        onClick={() => handleReset(user.id)}
-                      >
-                        <KeyRound className="h-3.5 w-3.5" /> Resetar senha
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={isPending}
-                        onClick={() => handleToggleStatus(user.id, user.status)}
-                      >
-                        {user.status === "ativo" ? "Inativar" : "Ativar"}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
               </TableCell>
               <TableCell>
                 <Button
@@ -176,39 +85,6 @@ export function MuseumList({ museums }: { museums: MuseumRow[] }) {
           {editing && (
             <MuseumForm museum={editing} onSaved={() => setEditing(null)} />
           )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={!!revealedPassword}
-        onOpenChange={(open) => !open && setRevealedPassword(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nova senha temporária</DialogTitle>
-            <DialogDescription>
-              Copie e entregue essa senha ao usuário — ela não será exibida
-              novamente. Ele precisará trocá-la no próximo login.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center gap-2 rounded-md border bg-muted px-3 py-2">
-            <code className="flex-1 text-sm font-medium">
-              {revealedPassword}
-            </code>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                if (revealedPassword) {
-                  navigator.clipboard.writeText(revealedPassword);
-                  toast.success("Senha copiada");
-                }
-              }}
-            >
-              Copiar
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -21,11 +21,6 @@ const museumSchema = z.object({
   status: z.enum(["ativo", "inativo"]),
 });
 
-const newMuseumSchema = museumSchema.extend({
-  responsibleName: z.string().min(2, "Informe o nome do responsável"),
-  responsibleEmail: z.string().email("E-mail inválido"),
-});
-
 async function assertMaster() {
   const supabase = await createClient();
   const {
@@ -53,65 +48,28 @@ export async function createMuseum(
 ): Promise<AdminActionState> {
   const supabase = await assertMaster();
 
-  const parsed = newMuseumSchema.safeParse({
+  const parsed = museumSchema.safeParse({
     name: formData.get("name"),
     address: formData.get("address") || undefined,
     colorHex: formData.get("colorHex"),
     status: formData.get("status"),
-    responsibleName: formData.get("responsibleName"),
-    responsibleEmail: formData.get("responsibleEmail"),
   });
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
   }
 
-  let adminClient;
-  try {
-    adminClient = createAdminClient();
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : "Erro de configuração" };
-  }
-
-  const { data: museum, error: museumError } = await supabase
-    .from("museums")
-    .insert({
-      name: parsed.data.name,
-      address: parsed.data.address ?? null,
-      color_hex: parsed.data.colorHex,
-      status: parsed.data.status,
-    })
-    .select("id")
-    .single();
-
-  if (museumError || !museum) {
-    return { error: museumError?.message ?? "Não foi possível criar o museu" };
-  }
-
-  const temporaryPassword = generateTemporaryPassword();
-
-  const { error: userError } = await adminClient.auth.admin.createUser({
-    email: parsed.data.responsibleEmail,
-    password: temporaryPassword,
-    email_confirm: true,
-    user_metadata: {
-      full_name: parsed.data.responsibleName,
-      museum_id: museum.id,
-      must_change_password: true,
-    },
+  const { error } = await supabase.from("museums").insert({
+    name: parsed.data.name,
+    address: parsed.data.address ?? null,
+    color_hex: parsed.data.colorHex,
+    status: parsed.data.status,
   });
 
-  if (userError) {
-    // Reverte o museu para não deixar um museu órfão sem usuário responsável.
-    await supabase.from("museums").delete().eq("id", museum.id);
-    return { error: userError.message };
-  }
+  if (error) return { error: error.message };
 
   revalidatePath("/admin/museus");
-  return {
-    success: "Museu e usuário criados com sucesso",
-    temporaryPassword,
-  };
+  return { success: "Museu criado com sucesso" };
 }
 
 export async function updateMuseum(
@@ -148,6 +106,69 @@ export async function updateMuseum(
   return { success: "Museu atualizado com sucesso" };
 }
 
+const createUserSchema = z.object({
+  fullName: z.string().min(2, "Informe o nome completo"),
+  email: z.string().email("E-mail inválido"),
+  museumId: z.string().uuid("Selecione um museu"),
+  status: z.enum(["ativo", "inativo"]),
+});
+
+export async function createUser(
+  _prevState: AdminActionState,
+  formData: FormData
+): Promise<AdminActionState> {
+  await assertMaster();
+
+  const parsed = createUserSchema.safeParse({
+    fullName: formData.get("fullName"),
+    email: formData.get("email"),
+    museumId: formData.get("museumId"),
+    status: formData.get("status"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos" };
+  }
+
+  const temporaryPassword = generateTemporaryPassword();
+
+  let adminClient;
+  try {
+    adminClient = createAdminClient();
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Erro de configuração" };
+  }
+
+  const { data, error } = await adminClient.auth.admin.createUser({
+    email: parsed.data.email,
+    password: temporaryPassword,
+    email_confirm: true,
+    user_metadata: {
+      full_name: parsed.data.fullName,
+      museum_id: parsed.data.museumId,
+      must_change_password: true,
+    },
+  });
+
+  if (error || !data.user) {
+    return { error: error?.message ?? "Não foi possível criar o usuário" };
+  }
+
+  if (parsed.data.status === "inativo") {
+    const supabase = await createClient();
+    await supabase
+      .from("profiles")
+      .update({ status: "inativo" })
+      .eq("id", data.user.id);
+  }
+
+  revalidatePath("/admin/usuarios");
+  return {
+    success: "Usuário criado com sucesso",
+    temporaryPassword,
+  };
+}
+
 export async function resetUserPassword(
   userId: string
 ): Promise<AdminActionState> {
@@ -173,7 +194,7 @@ export async function resetUserPassword(
     .update({ must_change_password: true })
     .eq("id", userId);
 
-  revalidatePath("/admin/museus");
+  revalidatePath("/admin/usuarios");
   return {
     success: "Senha redefinida com sucesso",
     temporaryPassword,
@@ -192,7 +213,7 @@ export async function toggleUserStatus(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/museus");
+  revalidatePath("/admin/usuarios");
   return {
     success: status === "ativo" ? "Usuário ativado" : "Usuário inativado",
   };

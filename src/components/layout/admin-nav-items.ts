@@ -1,4 +1,4 @@
-import { Landmark, Building2, type LucideIcon } from "lucide-react";
+import { Landmark, Users, Building2, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -8,5 +8,6 @@ export interface NavItem {
 
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: "/admin/museus", label: "Museus", icon: Building2 },
+  { href: "/admin/usuarios", label: "Usuários", icon: Users },
   { href: "/admin/bens", label: "Bens Culturais", icon: Landmark },
 ];
