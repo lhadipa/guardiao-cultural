@@ -88,31 +88,6 @@ export function AssetForm() {
 
       <CepFields />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="latitude">Latitude *</Label>
-          <Input
-            id="latitude"
-            name="latitude"
-            type="number"
-            step="any"
-            placeholder="-20.3855"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="longitude">Longitude *</Label>
-          <Input
-            id="longitude"
-            name="longitude"
-            type="number"
-            step="any"
-            placeholder="-43.5035"
-            required
-          />
-        </div>
-      </div>
-
       {state.error && <p className="text-sm text-destructive">{state.error}</p>}
 
       <div className="flex gap-3">

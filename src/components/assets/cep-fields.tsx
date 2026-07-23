@@ -13,6 +13,11 @@ interface ViaCepResult {
   erro?: boolean;
 }
 
+interface Coords {
+  latitude: string;
+  longitude: string;
+}
+
 function formatCep(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 8);
   if (digits.length <= 5) return digits;
@@ -24,11 +29,28 @@ function buildAddress(result: ViaCepResult, complemento: string) {
   return `${parts} - ${result.bairro}, ${result.localidade}/${result.uf}`;
 }
 
+async function geocodeAddress(result: ViaCepResult): Promise<Coords | null> {
+  const query = [result.logradouro, result.bairro, result.localidade, result.uf, "Brazil"]
+    .filter(Boolean)
+    .join(", ");
+
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=${encodeURIComponent(
+      query
+    )}`
+  );
+  const data: Array<{ lat: string; lon: string }> = await res.json();
+  if (data.length === 0) return null;
+  return { latitude: data[0].lat, longitude: data[0].lon };
+}
+
 export function CepFields() {
   const [cep, setCep] = useState("");
   const [complemento, setComplemento] = useState("");
   const [result, setResult] = useState<ViaCepResult | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [coords, setCoords] = useState<Coords | null>(null);
+  const [coordStatus, setCoordStatus] = useState<"idle" | "loading" | "error">("idle");
 
   async function lookupCep(value: string) {
     const digits = value.replace(/\D/g, "");
@@ -36,6 +58,7 @@ export function CepFields() {
 
     setStatus("loading");
     setResult(null);
+    setCoords(null);
     try {
       const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
       const data: ViaCepResult = await res.json();
@@ -45,6 +68,15 @@ export function CepFields() {
       }
       setResult(data);
       setStatus("idle");
+
+      setCoordStatus("loading");
+      try {
+        const found = await geocodeAddress(data);
+        setCoords(found);
+        setCoordStatus(found ? "idle" : "error");
+      } catch {
+        setCoordStatus("error");
+      }
     } catch {
       setStatus("error");
     }
@@ -55,6 +87,8 @@ export function CepFields() {
   return (
     <div className="space-y-4">
       <input type="hidden" name="address" value={address} />
+      <input type="hidden" name="latitude" value={coords?.latitude ?? ""} />
+      <input type="hidden" name="longitude" value={coords?.longitude ?? ""} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
@@ -91,10 +125,28 @@ export function CepFields() {
       </div>
 
       {result && (
-        <p className="flex items-start gap-1.5 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-          <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-          {address}
-        </p>
+        <div className="space-y-1.5 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+          <p className="flex items-start gap-1.5">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+            {address}
+          </p>
+          <p className="flex items-center gap-1.5 pl-5.5 text-xs">
+            {coordStatus === "loading" && (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Localizando coordenadas...
+              </>
+            )}
+            {coordStatus === "idle" && coords && (
+              <>Coordenadas: {coords.latitude}, {coords.longitude}</>
+            )}
+            {coordStatus === "error" && (
+              <span className="text-destructive">
+                Não foi possível localizar as coordenadas automaticamente para este endereço.
+              </span>
+            )}
+          </p>
+        </div>
       )}
     </div>
   );
