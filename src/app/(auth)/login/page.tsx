@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import { signIn, type AuthActionState } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -57,12 +56,6 @@ export default function LoginPage() {
             {isPending ? "Entrando..." : "Entrar"}
           </Button>
         </form>
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          Não tem conta?{" "}
-          <Link href="/cadastro" className="text-primary underline">
-            Cadastre-se
-          </Link>
-        </p>
       </CardContent>
     </Card>
   );

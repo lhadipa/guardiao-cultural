@@ -1,7 +1,9 @@
-// Tipos manuais espelhando supabase/migrations/0001_init.sql.
+// Tipos manuais espelhando supabase/migrations/*.sql.
 // Substituir por `supabase gen types typescript` assim que o projeto remoto existir.
 
-export type Role = "admin" | "gestor" | "tecnico" | "visualizador";
+export type Role = "master" | "user";
+export type ProfileStatus = "ativo" | "inativo";
+export type MuseumStatus = "ativo" | "inativo";
 export type AssetStatus = "seguro" | "alerta";
 export type ConservationStatus = "bom" | "regular" | "ruim" | "em_risco";
 export type AlertPriority = "baixa" | "media" | "alta" | "critica";
@@ -9,12 +11,37 @@ export type AlertPriority = "baixa" | "media" | "alta" | "critica";
 export interface Database {
   public: {
     Tables: {
+      museums: {
+        Row: {
+          id: string;
+          name: string;
+          address: string | null;
+          color_hex: string;
+          status: MuseumStatus;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          address?: string | null;
+          color_hex?: string;
+          status?: MuseumStatus;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["museums"]["Insert"]>;
+      };
       profiles: {
         Row: {
           id: string;
           full_name: string | null;
           role: Role;
           avatar_url: string | null;
+          museum_id: string | null;
+          must_change_password: boolean;
+          status: ProfileStatus;
+          last_password_change_at: string | null;
           created_at: string;
         };
         Insert: {
@@ -22,6 +49,10 @@ export interface Database {
           full_name?: string | null;
           role?: Role;
           avatar_url?: string | null;
+          museum_id?: string | null;
+          must_change_password?: boolean;
+          status?: ProfileStatus;
+          last_password_change_at?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
@@ -39,6 +70,7 @@ export interface Database {
           longitude: number;
           status: AssetStatus;
           created_by: string | null;
+          museum_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -54,6 +86,7 @@ export interface Database {
           longitude: number;
           status?: AssetStatus;
           created_by?: string | null;
+          museum_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };

@@ -17,10 +17,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const ROLE_LABELS: Record<string, string> = {
-  admin: "Administrador",
-  gestor: "Gestor",
-  tecnico: "Técnico",
-  visualizador: "Visualizador",
+  master: "Administrador Master",
+  user: "Usuário",
 };
 
 export function UserMenu({

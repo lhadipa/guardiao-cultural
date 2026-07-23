@@ -9,10 +9,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const ROLE_LABELS: Record<string, string> = {
-  admin: "Administrador",
-  gestor: "Gestor",
-  tecnico: "Técnico",
-  visualizador: "Visualizador",
+  master: "Administrador Master",
+  user: "Usuário",
 };
 
 export default async function ContaPage() {
@@ -52,7 +50,7 @@ export default async function ContaPage() {
             <div>
               <CardTitle>{displayName}</CardTitle>
               <CardDescription>
-                {ROLE_LABELS[profile?.role ?? "tecnico"] ?? profile?.role}
+                {ROLE_LABELS[profile?.role ?? "user"] ?? profile?.role}
               </CardDescription>
             </div>
           </div>
@@ -71,7 +69,7 @@ export default async function ContaPage() {
           <div>
             <p className="text-xs text-muted-foreground">Nível de acesso</p>
             <p className="text-sm font-medium">
-              {ROLE_LABELS[profile?.role ?? "tecnico"] ?? profile?.role}
+              {ROLE_LABELS[profile?.role ?? "user"] ?? profile?.role}
             </p>
           </div>
           {profile?.created_at && (

@@ -1,8 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/login", "/cadastro"];
-const PUBLIC_EXACT_ROUTES = ["/"];
+const PUBLIC_EXACT_ROUTES = ["/", "/login", "/admin-login"];
+const CHANGE_PASSWORD_ROUTE = "/trocar-senha";
+const ADMIN_PREFIX = "/admin";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -33,17 +34,50 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPublicRoute =
-    PUBLIC_ROUTES.some((route) => path.startsWith(route)) ||
-    PUBLIC_EXACT_ROUTES.includes(path);
+  const isPublicRoute = PUBLIC_EXACT_ROUTES.includes(path);
 
-  if (!user && !isPublicRoute) {
+  if (!user) {
+    if (isPublicRoute) return supabaseResponse;
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = path.startsWith(ADMIN_PREFIX) ? "/admin-login" : "/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && isPublicRoute) {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, must_change_password")
+    .eq("id", user.id)
+    .single();
+
+  const role = profile?.role ?? "user";
+  const mustChangePassword = profile?.must_change_password ?? false;
+  const homePath = role === "master" ? "/admin" : "/dashboard";
+
+  if (isPublicRoute) {
+    const url = request.nextUrl.clone();
+    url.pathname = homePath;
+    return NextResponse.redirect(url);
+  }
+
+  if (mustChangePassword && path !== CHANGE_PASSWORD_ROUTE) {
+    const url = request.nextUrl.clone();
+    url.pathname = CHANGE_PASSWORD_ROUTE;
+    return NextResponse.redirect(url);
+  }
+
+  if (!mustChangePassword && path === CHANGE_PASSWORD_ROUTE) {
+    const url = request.nextUrl.clone();
+    url.pathname = homePath;
+    return NextResponse.redirect(url);
+  }
+
+  if (role === "master" && !path.startsWith(ADMIN_PREFIX) && path !== CHANGE_PASSWORD_ROUTE) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin";
+    return NextResponse.redirect(url);
+  }
+
+  if (role !== "master" && path.startsWith(ADMIN_PREFIX)) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

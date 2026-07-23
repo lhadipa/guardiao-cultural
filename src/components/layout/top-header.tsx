@@ -14,7 +14,13 @@ export function TopHeader({
   role: string;
 }) {
   return (
-    <header className="flex items-center justify-between gap-3 bg-gradient-to-r from-[#6b2410] to-[#b8541f] px-4 py-3 text-white sm:px-6">
+    <header
+      className="flex items-center justify-between gap-3 px-4 py-3 text-white sm:px-6"
+      style={{
+        background:
+          "linear-gradient(to right, var(--primary), color-mix(in srgb, var(--primary) 65%, white))",
+      }}
+    >
       <div className="flex items-center gap-3">
         <div className="md:hidden">
           <MobileNav />
@@ -35,7 +41,7 @@ export function TopHeader({
       <div className="flex items-center gap-2 sm:gap-3">
         <Button
           nativeButton={false}
-          className="bg-white text-[#6b2410] hover:bg-white/90"
+          className="bg-white text-primary hover:bg-white/90"
           render={<Link href="/bens/novo" />}
         >
           <Plus className="h-4 w-4" />
