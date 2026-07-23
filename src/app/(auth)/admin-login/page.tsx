@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { adminSignIn, type AuthActionState } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,12 @@ export default function AdminLoginPage() {
             {isPending ? "Entrando..." : "Entrar"}
           </Button>
         </form>
+        <p className="mt-4 text-center text-sm text-muted-foreground">
+          É usuário de museu?{" "}
+          <Link href="/login" className="text-primary underline">
+            Login
+          </Link>
+        </p>
       </CardContent>
     </Card>
   );
