@@ -23,7 +23,7 @@ export function MuseumFilter({
         }
         router.push(`/admin/bens?${params.toString()}`);
       }}
-      className="flex h-9 w-full max-w-xs rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex h-9 w-full max-w-xs cursor-pointer rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <option value="">Todos os museus</option>
       {museums.map((museum) => (

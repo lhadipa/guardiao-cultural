@@ -204,8 +204,17 @@ export async function resetUserPassword(
 export async function toggleUserStatus(
   userId: string,
   status: "ativo" | "inativo"
-) {
+): Promise<AdminActionState> {
   const supabase = await assertMaster();
-  await supabase.from("profiles").update({ status }).eq("id", userId);
+  const { error } = await supabase
+    .from("profiles")
+    .update({ status })
+    .eq("id", userId);
+
+  if (error) return { error: error.message };
+
   revalidatePath("/admin/usuarios");
+  return {
+    success: status === "ativo" ? "Usuário ativado" : "Usuário inativado",
+  };
 }

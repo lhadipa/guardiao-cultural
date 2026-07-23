@@ -13,11 +13,6 @@ interface ViaCepResult {
   erro?: boolean;
 }
 
-interface Coords {
-  latitude: string;
-  longitude: string;
-}
-
 function formatCep(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 8);
   if (digits.length <= 5) return digits;
@@ -30,29 +25,16 @@ function buildAddress(result: ViaCepResult, numero: string, complemento: string)
   return `${withComplemento} - ${result.bairro}, ${result.localidade}/${result.uf}`;
 }
 
-async function geocodeAddress(result: ViaCepResult): Promise<Coords | null> {
-  const query = [result.logradouro, result.bairro, result.localidade, result.uf, "Brazil"]
-    .filter(Boolean)
-    .join(", ");
-
-  const res = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=${encodeURIComponent(
-      query
-    )}`
-  );
-  const data: Array<{ lat: string; lon: string }> = await res.json();
-  if (data.length === 0) return null;
-  return { latitude: data[0].lat, longitude: data[0].lon };
-}
-
-export function CepFields() {
+export function MuseumAddressFields({
+  defaultAddress,
+}: {
+  defaultAddress?: string | null;
+}) {
   const [cep, setCep] = useState("");
   const [numero, setNumero] = useState("");
   const [complemento, setComplemento] = useState("");
   const [result, setResult] = useState<ViaCepResult | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
-  const [coords, setCoords] = useState<Coords | null>(null);
-  const [coordStatus, setCoordStatus] = useState<"idle" | "loading" | "error">("idle");
 
   async function lookupCep(value: string) {
     const digits = value.replace(/\D/g, "");
@@ -60,7 +42,6 @@ export function CepFields() {
 
     setStatus("loading");
     setResult(null);
-    setCoords(null);
     try {
       const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
       const data: ViaCepResult = await res.json();
@@ -70,30 +51,20 @@ export function CepFields() {
       }
       setResult(data);
       setStatus("idle");
-
-      setCoordStatus("loading");
-      try {
-        const found = await geocodeAddress(data);
-        setCoords(found);
-        setCoordStatus(found ? "idle" : "error");
-      } catch {
-        setCoordStatus("error");
-      }
     } catch {
       setStatus("error");
     }
   }
 
-  const address = result ? buildAddress(result, numero, complemento) : "";
+  const resolvedAddress = result ? buildAddress(result, numero, complemento) : "";
+  const address = resolvedAddress || defaultAddress || "";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <input type="hidden" name="address" value={address} />
-      <input type="hidden" name="latitude" value={coords?.latitude ?? ""} />
-      <input type="hidden" name="longitude" value={coords?.longitude ?? ""} />
 
       <div className="space-y-2">
-        <Label htmlFor="cep">CEP *</Label>
+        <Label htmlFor="cep">CEP</Label>
         <div className="relative">
           <Input
             id="cep"
@@ -101,7 +72,6 @@ export function CepFields() {
             placeholder="00000-000"
             onChange={(e) => setCep(formatCep(e.target.value))}
             onBlur={(e) => lookupCep(e.target.value)}
-            required
           />
           {status === "loading" && (
             <Loader2 className="absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
@@ -136,30 +106,16 @@ export function CepFields() {
         </div>
       </div>
 
-      {result && (
-        <div className="space-y-1.5 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-          <p className="flex items-start gap-1.5">
-            <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-            {address}
-          </p>
-          <p className="flex items-center gap-1.5 pl-5.5 text-xs">
-            {coordStatus === "loading" && (
-              <>
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Localizando coordenadas...
-              </>
-            )}
-            {coordStatus === "idle" && coords && (
-              <>Coordenadas: {coords.latitude}, {coords.longitude}</>
-            )}
-            {coordStatus === "error" && (
-              <span className="text-destructive">
-                Não foi possível localizar as coordenadas automaticamente para este endereço.
-              </span>
-            )}
-          </p>
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label htmlFor="addressPreview">Endereço</Label>
+        <p
+          id="addressPreview"
+          className="flex items-start gap-1.5 rounded-md border bg-muted px-3 py-2 text-sm text-muted-foreground"
+        >
+          <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+          {address || "Informe o CEP para preencher automaticamente"}
+        </p>
+      </div>
     </div>
   );
 }

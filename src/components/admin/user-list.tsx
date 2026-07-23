@@ -49,8 +49,16 @@ export function UserList({ users }: { users: UserRow[] }) {
   }
 
   function handleToggleStatus(userId: string, status: "ativo" | "inativo") {
-    startTransition(() => {
-      toggleUserStatus(userId, status === "ativo" ? "inativo" : "ativo");
+    startTransition(async () => {
+      const result = await toggleUserStatus(
+        userId,
+        status === "ativo" ? "inativo" : "ativo"
+      );
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(result.success ?? "Status atualizado");
     });
   }
 

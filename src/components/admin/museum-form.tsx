@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MuseumAddressFields } from "./museum-address-fields";
 
 const initialState: AdminActionState = {};
 
@@ -57,15 +58,7 @@ export function MuseumForm({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="address">Endereço</Label>
-        <Input
-          id="address"
-          name="address"
-          defaultValue={museum?.address ?? ""}
-          placeholder="Rua, número, cidade/UF"
-        />
-      </div>
+      <MuseumAddressFields defaultAddress={museum?.address} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
@@ -100,7 +93,7 @@ export function MuseumForm({
             id="status"
             name="status"
             defaultValue={museum?.status ?? "ativo"}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-9 w-full cursor-pointer rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="ativo">Ativo</option>
             <option value="inativo">Inativo</option>
