@@ -45,7 +45,13 @@ async function geocodeAddress(result: ViaCepResult): Promise<Coords | null> {
   return { latitude: data[0].lat, longitude: data[0].lon };
 }
 
-export function CepFields() {
+export interface CepFieldsDefaults {
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export function CepFields({ defaults }: { defaults?: CepFieldsDefaults }) {
   const [cep, setCep] = useState("");
   const [numero, setNumero] = useState("");
   const [complemento, setComplemento] = useState("");
@@ -84,16 +90,21 @@ export function CepFields() {
     }
   }
 
-  const address = result ? buildAddress(result, numero, complemento) : "";
+  const resolvedAddress = result ? buildAddress(result, numero, complemento) : "";
+  const address = resolvedAddress || defaults?.address || "";
+  const latitude = coords?.latitude ?? (defaults?.latitude != null ? String(defaults.latitude) : "");
+  const longitude = coords?.longitude ?? (defaults?.longitude != null ? String(defaults.longitude) : "");
 
   return (
     <div className="space-y-4">
       <input type="hidden" name="address" value={address} />
-      <input type="hidden" name="latitude" value={coords?.latitude ?? ""} />
-      <input type="hidden" name="longitude" value={coords?.longitude ?? ""} />
+      <input type="hidden" name="latitude" value={latitude} />
+      <input type="hidden" name="longitude" value={longitude} />
 
       <div className="space-y-2">
-        <Label htmlFor="cep">CEP *</Label>
+        <Label htmlFor="cep">
+          CEP {defaults?.address ? "" : "*"}
+        </Label>
         <div className="relative">
           <Input
             id="cep"
@@ -101,7 +112,7 @@ export function CepFields() {
             placeholder="00000-000"
             onChange={(e) => setCep(formatCep(e.target.value))}
             onBlur={(e) => lookupCep(e.target.value)}
-            required
+            required={!defaults?.address}
           />
           {status === "loading" && (
             <Loader2 className="absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
@@ -136,7 +147,7 @@ export function CepFields() {
         </div>
       </div>
 
-      {result && (
+      {address && (
         <div className="space-y-1.5 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
           <p className="flex items-start gap-1.5">
             <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
@@ -151,6 +162,9 @@ export function CepFields() {
             )}
             {coordStatus === "idle" && coords && (
               <>Coordenadas: {coords.latitude}, {coords.longitude}</>
+            )}
+            {coordStatus === "idle" && !coords && latitude && longitude && (
+              <>Coordenadas: {latitude}, {longitude}</>
             )}
             {coordStatus === "error" && (
               <span className="text-destructive">

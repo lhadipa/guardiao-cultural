@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { createAsset, type AssetActionState } from "@/actions/assets";
+import { createAsset, updateAsset, type AssetActionState } from "@/actions/assets";
 import { ASSET_CATEGORIES, CONSERVATION_STATUSES } from "@/lib/validations/asset";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,11 +12,21 @@ import { CepFields } from "./cep-fields";
 
 const initialState: AssetActionState = {};
 
-export function AssetForm() {
-  const [state, formAction, isPending] = useActionState(
-    createAsset,
-    initialState
-  );
+export interface AssetFormValues {
+  id: string;
+  name: string;
+  category: string;
+  conservationStatus: string;
+  technicalDescription: string | null;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  photos: { id: string; storagePath: string }[];
+}
+
+export function AssetForm({ asset }: { asset?: AssetFormValues }) {
+  const action = asset ? updateAsset.bind(null, asset.id) : createAsset;
+  const [state, formAction, isPending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">
@@ -25,6 +35,7 @@ export function AssetForm() {
         <Input
           id="name"
           name="name"
+          defaultValue={asset?.name}
           placeholder="Ex: Imagem de São Francisco"
           required
         />
@@ -37,7 +48,7 @@ export function AssetForm() {
             id="category"
             name="category"
             required
-            defaultValue=""
+            defaultValue={asset?.category ?? ""}
             className="flex h-9 w-full cursor-pointer rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="" disabled>
@@ -56,7 +67,7 @@ export function AssetForm() {
             id="conservationStatus"
             name="conservationStatus"
             required
-            defaultValue=""
+            defaultValue={asset?.conservationStatus ?? ""}
             className="flex h-9 w-full cursor-pointer rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="" disabled>
@@ -76,6 +87,7 @@ export function AssetForm() {
         <Textarea
           id="technicalDescription"
           name="technicalDescription"
+          defaultValue={asset?.technicalDescription ?? ""}
           placeholder="Descrição técnica do bem..."
           rows={4}
         />
@@ -83,16 +95,26 @@ export function AssetForm() {
 
       <div className="space-y-2">
         <Label>Upload de Imagens</Label>
-        <PhotoUploader />
+        <PhotoUploader existingPhotos={asset?.photos} />
       </div>
 
-      <CepFields />
+      <CepFields
+        defaults={
+          asset
+            ? {
+                address: asset.address,
+                latitude: asset.latitude,
+                longitude: asset.longitude,
+              }
+            : undefined
+        }
+      />
 
       {state.error && <p className="text-sm text-destructive">{state.error}</p>}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Salvando..." : "Salvar Bem"}
+          {isPending ? "Salvando..." : asset ? "Salvar alterações" : "Salvar Bem"}
         </Button>
       </div>
     </form>

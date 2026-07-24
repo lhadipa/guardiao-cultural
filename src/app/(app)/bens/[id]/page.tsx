@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import { MapPin } from "lucide-react";
+import { MapPin, Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { RgcBadge } from "@/components/assets/rgc-badge";
 import { AssetStatusBadge } from "@/components/assets/asset-status-badge";
+import { PhotoLightbox } from "@/components/assets/photo-lightbox";
+import { Button } from "@/components/ui/button";
 import { getAssetPhotoUrl } from "@/lib/storage";
 import { CONSERVATION_STATUSES } from "@/lib/validations/asset";
 
@@ -51,25 +53,22 @@ export default async function BemDetalhePage({
             </span>
           </div>
         </div>
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={<Link href={`/bens/${asset.id}/editar`} />}
+        >
+          <Pencil className="h-4 w-4" /> Editar
+        </Button>
       </div>
 
       {photos.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {photos.map((photo) => (
-            <div
-              key={photo.storage_path}
-              className="relative aspect-square overflow-hidden rounded-md border"
-            >
-              <Image
-                src={getAssetPhotoUrl(photo.storage_path)}
-                alt={asset.name}
-                fill
-                sizes="(min-width: 640px) 33vw, 50vw"
-                className="object-cover"
-              />
-            </div>
-          ))}
-        </div>
+        <PhotoLightbox
+          photos={photos.map((photo) => ({
+            src: getAssetPhotoUrl(photo.storage_path),
+            alt: asset.name,
+          }))}
+        />
       )}
 
       <div className="grid gap-4 rounded-lg border bg-card p-4 sm:grid-cols-2">
